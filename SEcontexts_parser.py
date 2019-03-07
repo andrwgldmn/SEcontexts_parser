@@ -4,24 +4,28 @@ import re
 value = None
 
 def parse_fc_one(prop, types, output_file):
+    def do_parse(type, prop):
+         if type[0] in prop:
+             newline = 'type {}, {};\n'.format(prop, type[1])
+             #print(newline)
+             output_file.write(newline)
+
     type_data, other_types = types
 
     is_data_file = type_data[0] in prop
 
     if is_data_file:
-        newline = 'type {}, {}, file_type;\n'.format(prop, type_data[1])
+        newline = 'type {}, {};\n'.format(prop, type_data[1])
         #print(newline)
         output_file.write(newline)
     else:
-        for t in types:
-            if t[0] in prop:
-                newline = 'type {}, {};\n'.format(prop, t[1])
-                #print(newline)
-                output_file.write(newline)
+        do_parse(other_types[0], prop)
 
+    for t in other_types[1:]:
+        do_parse(t, prop)
 
 def parse_fc():
-    type_data = ("_data_file", "data_file_type")
+    type_data = ("_data_file", "data_file_type, file_type")
     other_types = (("_file", "file_type"),
             ("_device", "dev_type"),
             ("_socket", "file_type"),
@@ -37,8 +41,6 @@ def parse_fc():
     )
 
     all_types = [type_data, other_types]
-
-    is_data_file = False
 
     with open('file_contexts') as input_file:
         with open('file.te', 'w') as output_file:
