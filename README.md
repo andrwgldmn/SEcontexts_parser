@@ -1,6 +1,5 @@
 # SEcontexts_parser
 Парсер контекстов сеполиси (property_/service_/file_)
-Пока что не работает парсинг file_, но это временно.
 Сохранение идёт в файлы property.te/file.te/service.te
 ### Как использовать?
 python SEcontexts_parser.py

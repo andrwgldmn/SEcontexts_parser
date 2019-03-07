@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+import re
 value = None
 while value != 0:
     print (' ----------------------------')
@@ -18,17 +19,34 @@ while value != 0:
                         newline = 'type {}, property_type;\n'.format(prop)
                         output_file.write(newline)
     elif (value == 2):
-        print ("Not working for now. Will be implemented later.")
-#        with open('file_contexts') as input_file: 
-#            with open('file.te', 'w') as output_file:
-#                for line in input_file:
-#                    if len(line) > 2 and line[0] != '#':
-#                        try:
-#                            prop = line.split(':')[-2] 
-#                        except IndexError:
-#                            continue
-#                        newline = 'type {}, property_type;\n'.format(prop)
-#                        output_file.write(newline)
+        types = (
+            ("_data_file", "data_file_type"),
+            ("_file", "file_type"),
+            ("_device", "dev_type"),
+            ("_socket", "file_type"),
+            ("_sysfs", "fs_type, sysfs_type"),
+            ("sysfs_", "fs_type, sysfs_type"),
+            ("sysfs_", "fs_type, sysfs_type"),
+            ("_block_device", "dev_type"),
+            ("_dir", "file_type"),
+            ("_debugfs", "fs_type, debugfs_type"),
+            ("debugfs_", "fs_type, debugfs_type"), 
+            ("_daemon", "fs_type, sysfs_type"),
+            ("_exec" , "exec_type, file_type")
+        )
+
+        with open('file_contexts') as input_file: 
+            with open('file.te', 'w') as output_file:
+                for line in input_file:
+                    if len(line) > 2 and line[0] != '#':
+                        try:
+                            prop = line.split(':')[-2] 
+                        except IndexError:
+                            continue
+                        for t in types:
+                            if t[0] in prop:
+                                newline = 'type {}, {};\n'.format(prop, t[1])
+                                output_file.write(newline)
     elif (value == 3):
         with open('service_contexts') as input_file: 
             with open('service.te', 'w') as output_file:
