@@ -4,4 +4,4 @@
 ### Как использовать?
 python SEcontexts_parser.py
 
-Спасибо https://ru.stackoverflow.com/users/213678/andrey и https://ru.stackoverflow.com/users/201445/gil9red
+Спасибо https://ru.stackoverflow.com/users/213678/andrey и https://ru.stackoverflow.com/users/201445/gil9red и https://github.com/TheDeadOne
