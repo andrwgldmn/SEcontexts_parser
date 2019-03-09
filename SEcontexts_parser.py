@@ -111,9 +111,42 @@ def parse_fce_domains():
                     output_file.write(init_daemon)
                     subprocess.call(["rm", "-rf", "exec.te"])
 
+def only_domains():
+        with open('file_contexts') as source, open('output.txt', 'w') as destination:
+            for line in source:
+                if line.strip().endswith('_exec:s0'):
+                    destination.write(line)
+        with open('output.txt') as input_file, open('exec.te', 'w') as output_file:
+            for line in input_file:
+                if len(line) > 2 and line[0] != '#':
+                    try:
+                        prop = line.split(':')[-2] 
+                    except IndexError:
+                        continue
+                    newline = 'type {}, exec_type;\n'.format(prop)
+                    output_file.write(newline)
+                    subprocess.call(["rm", "-rf", "output.txt"])
+        with open('exec.te') as input_file, open('domains.te', 'w') as output_file:
+            for line in input_file:
+                if len(line) > 2 and line[0] != '#':
+                    try:
+                        prop = line.split(' ')[-2]
+                    except IndexError:
+                        continue
+                    remove_exec = prop.replace('_exec,','')
+                    domain = 'type {}, domain;\n'.format(remove_exec)
+                    domain_type = 'type {}_exec, exec_type, file_type;\n'.format(remove_exec)
+                    init_daemon = 'init_daemon_domain({})\n\n'.format(remove_exec)
+                    output_file.write(domain)
+                    output_file.write(domain_type)
+                    output_file.write(init_daemon)
+                    subprocess.call(["rm", "-rf", "exec.te"])
+                    subprocess.call(["rm", "-rf", "file.te"])
+                    subprocess.call(["rm", "-rf", "device.te"])
+
 while value != 0:
     print (' ----------------------------')
-    value = int(input(" Choose category: \n \n 0) Exit \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n  ---------------------------- \n "))
+    value = int(input(" Choose category: \n \n 0) Exit \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n 5) Generating domains only \n ---------------------------- \n "))
     if (value == 0):
         print('-' * 28 + '\n Thanks!\n' + '-' * 28)
     elif (value == 1):
@@ -148,3 +181,5 @@ while value != 0:
         parse_fcd()
         parse_fce_domains()       
 
+    elif (value ==5):
+        only_domains()
