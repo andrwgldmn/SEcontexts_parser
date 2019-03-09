@@ -44,8 +44,7 @@ def parse_fcf():
 
         with open('file.te', 'w') as fh:
             fh.writelines(i for i in lines if '_exec' not in i)
-
-
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 def parse_fcd():
         types = (('_device', 'dev_type'), ("_block_device", "dev_type"))
@@ -63,6 +62,7 @@ def parse_fcd():
                                 newline = 'type {}, {};\n'.format(prop, t[1])
                                 output_file.write(newline)
                                 break
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 def parse_fce():
         with open('file_contexts') as source, open('output.txt', 'w') as destination:
@@ -79,6 +79,7 @@ def parse_fce():
                     newline = 'type {}, exec_type;\n'.format(prop)
                     output_file.write(newline)
                     subprocess.call(["rm", "-rf", "output.txt"])
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 def parse_fce_domains():
         with open('file_contexts') as source, open('output.txt', 'w') as destination:
@@ -110,6 +111,7 @@ def parse_fce_domains():
                     output_file.write(domain_type)
                     output_file.write(init_daemon)
                     subprocess.call(["rm", "-rf", "exec.te"])
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 def only_domains():
         with open('file_contexts') as source, open('output.txt', 'w') as destination:
@@ -140,16 +142,11 @@ def only_domains():
                     output_file.write(domain)
                     output_file.write(domain_type)
                     output_file.write(init_daemon)
-                    subprocess.call(["rm", "-rf", "exec.te"])
-                    subprocess.call(["rm", "-rf", "file.te"])
-                    subprocess.call(["rm", "-rf", "device.te"])
+                    cmd = "rm -rf exec.te file.te device.te"
+                    os.system(cmd)
+        os.system('cls' if os.name == 'nt' else 'clear')
 
-while value != 0:
-    print (' ----------------------------')
-    value = int(input(" Choose category: \n \n 0) Exit \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n 5) Generating domains only \n ---------------------------- \n "))
-    if (value == 0):
-        print('-' * 28 + '\n Thanks!\n' + '-' * 28)
-    elif (value == 1):
+def property_contexts():
         with open('property_contexts') as input_file: 
             with open('property.te', 'w') as output_file:
                 for line in input_file:
@@ -160,12 +157,9 @@ while value != 0:
                             continue
                         newline = 'type {}, property_type;\n'.format(prop)
                         output_file.write(newline)
-    elif (value == 3):
-        parse_fcf()
-        parse_fcd()
-        parse_fce()
+        os.system('cls' if os.name == 'nt' else 'clear')
 
-    elif (value == 2):
+def service_contexts():
         with open('service_contexts') as input_file: 
             with open('service.te', 'w') as output_file:
                 for line in input_file:
@@ -176,10 +170,132 @@ while value != 0:
                             continue
                         newline = 'type {}, service_manager_type;\n'.format(prop)
                         output_file.write(newline)
-    elif (value == 4):
-        parse_fcf()
-        parse_fcd()
-        parse_fce_domains()       
+        os.system('cls' if os.name == 'nt' else 'clear')
 
-    elif (value ==5):
-        only_domains()
+def stock_fc():
+        cmd = "./sefcontext -o file_contexts file_contexts.bin"
+        os.system(cmd)
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+def stock_sepo():
+        cmd = "./sesearch --all sepolicy > sepolicy.txt"
+        os.system(cmd)
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+def cleanup():
+        cmd = "rm -rf file.te sepolicy.txt sepolicy file_contexts device.te file exec.te domains.te file service.te file_contexts.bin service_contexts property.te property_contexts"
+        os.system(cmd)
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+while value != 0:
+    print (' ----------------------------')
+    value = int(input(" 1) English \n 2) Русский \n 3) Українська \n---------------------------- \n "))
+    if (value != 1 and value != 2 and value != 3 ):
+        print ("\n Program has been terminated. \n" )
+    if (value == 1):
+        while value != 0:
+            print (' ----------------------------')
+            value = int(input(" Choose category: \n \n 0) Exit \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n 5) Generating domains only \n 6) Parsing stock file_contexts binary (taken from boot.img) for getting stock policies \n 7) Parsing stock sepolicy binary (taken from boot.img) for getting stock rules \n 8) Cleanup \n---------------------------- \n "))
+            
+            if (value == 0):
+                print('-' * 28 + '\n Thanks!\n' + '-' * 28)
+
+            elif (value == 1):
+                property_contexts()
+
+            elif (value == 3):
+                parse_fcf()
+                parse_fcd()
+                parse_fce()
+
+            elif (value == 2):
+                service_contexts()
+
+            elif (value == 4):
+                parse_fcf()
+                parse_fcd()
+                parse_fce_domains()       
+
+            elif (value ==5):
+                only_domains()
+
+            elif (value == 6):
+                stock_fc()
+
+            elif (value == 7):
+                stock_sepo()
+
+            elif (value == 8):
+                cleanup()
+
+    if (value == 2):
+        while value != 0:
+            print (' ----------------------------')
+            value = int(input(" Выберите категорию: \n \n 0) Выход \n 1) Анализ property_contexts \n 2) Анализ service_contexts \n 3) Анализ file_contexts \n 4) Анализ file_contexts из созданием типов \n 5) Создание ТОЛЬКО типов \n 6) Анализ стокового бинарника file_contexts (взятого из boot.img) для получения стоковых политик \n 7) Анализ стокового бинарника sepolicy (взятого из boot.img) для получения стоковых политик \n 8) Очистка \n---------------------------- \n "))
+            
+            if (value == 0):
+                print('-' * 28 + '\n Спасибо!\n' + '-' * 28)
+
+            elif (value == 1):
+                property_contexts()
+
+            elif (value == 3):
+                parse_fcf()
+                parse_fcd()
+                parse_fce()
+
+            elif (value == 2):
+                service_contexts()
+
+            elif (value == 4):
+                parse_fcf()
+                parse_fcd()
+                parse_fce_domains()       
+
+            elif (value ==5):
+                only_domains()
+
+            elif (value == 6):
+                stock_fc()
+
+            elif (value == 7):
+                stock_sepo()
+
+            elif (value == 8):
+                cleanup()
+
+    if (value == 3):
+        while value != 0:
+            print (' ----------------------------')
+            value = int(input(" Оберіть категорію: \n \n 0) Вихід \n 1) Аналіз property_contexts \n 2) Аналіз service_contexts \n 3) Аналіз file_contexts \n 4) Аналіз file_contexts зі створенням політик  \n 5) Створення ТІЛЬКИ політик \n 6) Аналіз стокового бінарника file_contexts (взятий з boot.img) для отримання стокових політик \n 7) Аналіз стокового бінарника sepolicy (взятий з boot.img) для отримання стокових політик \n 8) Очистка \n---------------------------- \n "))
+            
+            if (value == 0):
+                print('-' * 28 + '\n Дякую!\n' + '-' * 28)
+
+            elif (value == 1):
+                property_contexts()
+
+            elif (value == 3):
+                parse_fcf()
+                parse_fcd()
+                parse_fce()
+
+            elif (value == 2):
+                service_contexts()
+
+            elif (value == 4):
+                parse_fcf()
+                parse_fcd()
+                parse_fce_domains()       
+
+            elif (value ==5):
+                only_domains()
+
+            elif (value == 6):
+                stock_fc()
+
+            elif (value == 7):
+                stock_sepo()
+
+            elif (value == 8):
+                cleanup()
