@@ -3,6 +3,7 @@
 import re
 import os
 import subprocess
+
 value = None
 
 def parse_fcf():
@@ -44,6 +45,17 @@ def parse_fcf():
 
         with open('file.te', 'w') as fh:
             fh.writelines(i for i in lines if '_exec' not in i)
+
+        File = open('file.te', 'r')
+        str_list = set()
+        for i in File.readlines():
+            if i not in str_list:
+                str_list.add(i)
+        File.close()
+        File = open('file.te', 'w')
+        for j in str_list:
+            File.write(j)
+
         os.system('cls' if os.name == 'nt' else 'clear')
 
 def parse_fcd():
