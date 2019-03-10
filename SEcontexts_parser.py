@@ -1,20 +1,25 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import re
 import os
-import subprocess
 import requests
 
 value = None
+def help():
+        print (' ----------------------------')
+        print ('\n Eng:\n Put near this script your file_contexts.txt/property_contexts.txt/service_contexts.txt to work with 1-5 items, your sepolicy and file_contexts binary to work with 6-7  items, your log.txt or a dmesg file which can be renamed to it (its doesnt matter) to work with 8 item, copy a link of your logcat from Web to work with 9 item. \n')
+        print (' \n Рус: Положите рядом со скриптом ваши file_contexts.txt/property_contexts.txt/service_contexts.txt для работы с 1-5 пунктами, ваши бинарники sepolicy и file_contexts    для работы с 6-7 пунктами, ваш log.txt или это может быть файл dmesg, который просто переименован в log.txt (не имеет значения) для работы с 8 пунктом, скопируйте      ссылку на ваш логкат из сети для работы с 9 пунктом. \n ')
+        print (' \n Укр: Покладіть біля цього скрипта ваші file_contexts.txt/property_contexts.txt/service_contexts.txt для роботи з 1-5 пунктами, ваші бінарі sepolicy і file_contexts для роботи з 6-7 пунктами, ваш log.txt або це може бути файл dmesg, який просто перейменований в log.txt (не має значення) для роботи з 8 пунктом, скопіюйте ссилку на ваш  логкат з мережі для роботи з 9 пунктом. \n ')
+        print (' \n Made by andrwgldmn \n') 
+        print (' ----------------------------')
 
 def sepologparser_inet():
         with open('allows.te', 'w') as output_file:
             url = raw_input(' Enter the URL: ')
             r = requests.get(url)
             data = r.text
-
             pat = r"""avc:\s*denied\s*({\s*[^}]*\s*})\s+.*?scontext=u:r:([^:]*):s\d+.*?tcontext=.*?:(\w{2,}):s0.*?\s+tclass=([^\s:]*)\s+"""
-
             for what, scnt, tcnt, tc in re.findall(pat, data):
                 output_file.write("allow {} {}:{} {} \n".format(scnt, tcnt, tc, what))
         os.system('cls' if os.name == 'nt' else 'clear') 
@@ -39,21 +44,14 @@ def parse_fcf():
             ("debugfs_", "fs_type, debugfs_type"), 
             ("_daemon", "fs_type, sysfs_type")
 )
-
-        with open('file_contexts') as input_file: 
+        with open('file_contexts.txt') as input_file: 
             with open('file.te', 'w') as output_file:
                 for line in input_file:
                     if len(line) > 2 and line[0] != '#':
                         try:
-                            # Разбиваем строку на части по символу ':'
-                            # Из полученного списка берем предпоследний элемент
                             prop = line.split(':')[-2] 
                         except IndexError:
                             continue
-
-                        # Сначала проверяем тип data_file, потом file,
-                        # потом все остальное. Если тип соответствует,
-                        # то пишем в файл и прекращаем проверку строки.
                         for t in types:
                             if t[0] in prop:
                                 newline = 'type {}, {};\n'.format(prop, t[1])
@@ -63,7 +61,6 @@ def parse_fcf():
         lines = []
         with open('file.te') as fh:
             lines = fh.readlines()
-
         with open('file.te', 'w') as fh:
             fh.writelines(i for i in lines if '_exec' not in i)
 
@@ -76,29 +73,26 @@ def parse_fcf():
         File = open('file.te', 'w')
         for j in str_list:
             File.write(j)
-
         os.system('cls' if os.name == 'nt' else 'clear')
 
 def parse_fcd():
         types = (('_device', 'dev_type'), ("_block_device", "dev_type"))
-
-        with open('file_contexts') as input_file: 
-            with open('device.te', 'w') as output_file:
-                for line in input_file:
-                    if len(line) > 2 and line[0] != '#':
-                        try:
-                            prop = line.split(':')[-2] 
-                        except IndexError:
-                            continue
-                        for t in types:
-                            if t[0] in prop:
-                                newline = 'type {}, {};\n'.format(prop, t[1])
-                                output_file.write(newline)
-                                break
+        with open('file_contexts.txt') as input_file, open('device.te', 'w') as output_file:
+            for line in input_file:
+                if len(line) > 2 and line[0] != '#':
+                    try:
+                        prop = line.split(':')[-2] 
+                    except IndexError:
+                        continue
+                    for t in types:
+                        if t[0] in prop:
+                            newline = 'type {}, {};\n'.format(prop, t[1])
+                            output_file.write(newline)
+                            break
         os.system('cls' if os.name == 'nt' else 'clear')
 
 def parse_fce():
-        with open('file_contexts') as source, open('output.txt', 'w') as destination:
+        with open('file_contexts.txt') as source, open('output.txt', 'w') as destination:
             for line in source:
                 if line.strip().endswith('_exec:s0'):
                     destination.write(line)
@@ -111,98 +105,57 @@ def parse_fce():
                         continue
                     newline = 'type {}, exec_type;\n'.format(prop)
                     output_file.write(newline)
-                    subprocess.call(["rm", "-rf", "output.txt"])
-        os.system('cls' if os.name == 'nt' else 'clear')
-
-def parse_fce_domains():
-        with open('file_contexts') as source, open('output.txt', 'w') as destination:
-            for line in source:
-                if line.strip().endswith('_exec:s0'):
-                    destination.write(line)
-        with open('output.txt') as input_file, open('exec.te', 'w') as output_file:
-            for line in input_file:
-                if len(line) > 2 and line[0] != '#':
-                    try:
-                        prop = line.split(':')[-2] 
-                    except IndexError:
-                        continue
-                    newline = 'type {}, exec_type;\n'.format(prop)
-                    output_file.write(newline)
-                    subprocess.call(["rm", "-rf", "output.txt"])
-        with open('exec.te') as input_file, open('domains.te', 'w') as output_file:
-            for line in input_file:
-                if len(line) > 2 and line[0] != '#':
-                    try:
-                        prop = line.split(' ')[-2]
-                    except IndexError:
-                        continue
-                    remove_exec = prop.replace('_exec,','')
-                    domain = 'type {}, domain;\n'.format(remove_exec)
-                    domain_type = 'type {}_exec, exec_type, file_type;\n'.format(remove_exec)
-                    init_daemon = 'init_daemon_domain({})\n\n'.format(remove_exec)
-                    output_file.write(domain)
-                    output_file.write(domain_type)
-                    output_file.write(init_daemon)
-                    subprocess.call(["rm", "-rf", "exec.te"])
-        os.system('cls' if os.name == 'nt' else 'clear')
-
-def only_domains():
-        with open('file_contexts') as source, open('output.txt', 'w') as destination:
-            for line in source:
-                if line.strip().endswith('_exec:s0'):
-                    destination.write(line)
-        with open('output.txt') as input_file, open('exec.te', 'w') as output_file:
-            for line in input_file:
-                if len(line) > 2 and line[0] != '#':
-                    try:
-                        prop = line.split(':')[-2] 
-                    except IndexError:
-                        continue
-                    newline = 'type {}, exec_type;\n'.format(prop)
-                    output_file.write(newline)
-                    subprocess.call(["rm", "-rf", "output.txt"])
-        with open('exec.te') as input_file, open('domains.te', 'w') as output_file:
-            for line in input_file:
-                if len(line) > 2 and line[0] != '#':
-                    try:
-                        prop = line.split(' ')[-2]
-                    except IndexError:
-                        continue
-                    remove_exec = prop.replace('_exec,','')
-                    domain = 'type {}, domain;\n'.format(remove_exec)
-                    domain_type = 'type {}_exec, exec_type, file_type;\n'.format(remove_exec)
-                    init_daemon = 'init_daemon_domain({})\n\n'.format(remove_exec)
-                    output_file.write(domain)
-                    output_file.write(domain_type)
-                    output_file.write(init_daemon)
-                    cmd = "rm -rf exec.te file.te device.te"
+                    cmd = "rm -rf output.txt"
                     os.system(cmd)
         os.system('cls' if os.name == 'nt' else 'clear')
 
+def parse_fce_domains():
+        parse_fce()
+        with open('exec.te') as input_file, open('domains.te', 'w') as output_file:
+            for line in input_file:
+                if len(line) > 2 and line[0] != '#':
+                    try:
+                        prop = line.split(' ')[-2]
+                    except IndexError:
+                        continue
+                    remove_exec = prop.replace('_exec,','')
+                    domain = 'type {}, domain;\n'.format(remove_exec)
+                    domain_type = 'type {}_exec, exec_type, file_type;\n'.format(remove_exec)
+                    init_daemon = 'init_daemon_domain({})\n\n'.format(remove_exec)
+                    output_file.write(domain)
+                    output_file.write(domain_type)
+                    output_file.write(init_daemon)
+                    cmd = "rm -rf exec.te"
+                    os.system(cmd)
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+def only_domains():
+        parse_fce()
+        parse_fce_domains()
+        os.system('cls' if os.name == 'nt' else 'clear')
+
 def property_contexts():
-        with open('property_contexts') as input_file: 
-            with open('property.te', 'w') as output_file:
-                for line in input_file:
-                    if len(line) > 2 and line[0] != '#':
-                        try:
-                            prop = line.split(':')[-2] 
-                        except IndexError:
-                            continue
-                        newline = 'type {}, property_type;\n'.format(prop)
-                        output_file.write(newline)
+        with open('property_contexts.txt') as input_file, open('property.te', 'w') as output_file:
+            for line in input_file:
+                if len(line) > 2 and line[0] != '#':
+                    try:
+                        prop = line.split(':')[-2] 
+                    except IndexError:
+                        continue
+                    newline = 'type {}, property_type;\n'.format(prop)
+                    output_file.write(newline)
         os.system('cls' if os.name == 'nt' else 'clear')
 
 def service_contexts():
-        with open('service_contexts') as input_file: 
-            with open('service.te', 'w') as output_file:
-                for line in input_file:
-                    if len(line) > 2 and line[0] != '#':
-                        try:
-                            prop = line.split(':')[-2] 
-                        except IndexError:
-                            continue
-                        newline = 'type {}, service_manager_type;\n'.format(prop)
-                        output_file.write(newline)
+        with open('service_contexts.txt') as input_file, open('service.te', 'w') as output_file:
+            for line in input_file:
+                if len(line) > 2 and line[0] != '#':
+                    try:
+                        prop = line.split(':')[-2] 
+                    except IndexError:
+                        continue
+                    newline = 'type {}, service_manager_type;\n'.format(prop)
+                    output_file.write(newline)
         os.system('cls' if os.name == 'nt' else 'clear')
 
 def stock_fc():
@@ -221,6 +174,7 @@ def cleanup():
         os.system('cls' if os.name == 'nt' else 'clear')
 
 while value != 0:
+    help()
     print (' ----------------------------')
     value = int(input(" 1) English \n 2) Русский \n 3) Українська \n ---------------------------- \n "))
     if (value != 1 and value != 2 and value != 3 ):
@@ -228,7 +182,7 @@ while value != 0:
     if (value == 1):
         while value != 0:
             print (' ----------------------------')
-            value = int(input(" Choose category: \n \n 0) Exit \n 00) Cleanup \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n 5) Generating domains only \n 6) Parsing stock file_contexts binary (taken from boot.img) for getting stock policies \n 7) Parsing stock sepolicy binary (taken from boot.img) for getting stock rules \n 8) Parsing local log.txt for getting SEPolicy rules \n 9) Parsing log.txt for getting SEPolicy rules via Internet (log.txt will be given from your entered URL) \n 10) Cleanup \n  ---------------------------- \n "))
+            value = int(input(" Choose category: \n \n 0) Exit \n 00) Cleanup \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n 5) Generating domains only \n 6) Parsing stock file_contexts binary (taken from boot.img) for getting stock policies \n 7) Parsing stock sepolicy binary (taken from boot.img) for getting stock rules \n 8) Parsing local log.txt for getting SEPolicy rules \n 9) Parsing log.txt for getting SEPolicy rules via Internet (log.txt will be given from your entered URL) \n  ---------------------------- \n "))
             
             if (value == 0):
                 print('-' * 28 + '\n Thanks!\n' + '-' * 28)
