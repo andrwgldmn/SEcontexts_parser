@@ -1,7 +1,7 @@
 # SEcontexts_parser
 Parsing sepolicy contexts (property_/service_/file_)
 
-Parsing stock binaries allows.te
+Parsing stock binaries file_contexts/sepolicy
 
 Parsing logcat for getting sepolicy rules (local and via Internet)
 ### How to use? 
