@@ -3,8 +3,29 @@
 import re
 import os
 import subprocess
+import requests
 
 value = None
+
+def sepologparser_inet():
+        with open('allows.te', 'w') as output_file:
+            url = raw_input(' Enter the URL: ')
+            r = requests.get(url)
+            data = r.text
+
+            pat = r"""avc:\s*denied\s*({\s*[^}]*\s*})\s+.*?scontext=u:r:([^:]*):s\d+.*?tcontext=.*?:(\w{2,}):s0.*?\s+tclass=([^\s:]*)\s+"""
+
+            for what, scnt, tcnt, tc in re.findall(pat, data):
+                output_file.write("allow {} {}:{} {} \n".format(scnt, tcnt, tc, what))
+        os.system('cls' if os.name == 'nt' else 'clear') 
+
+def sepologparser_local():
+        with open('log.txt') as input_file, open('allows.te', 'w') as output_file:
+            text = input_file.read()
+            pat = r"""avc:\s*denied\s*({\s*[^}]*\s*})\s+.*?scontext=u:r:([^:]*):s\d+.*?tcontext=.*?:(\w{2,}):s0.*?\s+tclass=([^\s:]*)\s+"""
+            for what, scnt, tcnt, tc in re.findall(pat, text):
+                output_file.write("allow {} {}:{} {} \n".format(scnt, tcnt, tc, what))
+        os.system('cls' if os.name == 'nt' else 'clear')    
 
 def parse_fcf():
         types = (
@@ -195,19 +216,19 @@ def stock_sepo():
         os.system('cls' if os.name == 'nt' else 'clear')
 
 def cleanup():
-        cmd = "rm -rf file.te sepolicy.txt sepolicy file_contexts device.te file exec.te domains.te file service.te file_contexts.bin service_contexts property.te property_contexts"
+        cmd = "rm -rf file.te sepolicy.txt sepolicy log.txt allows.te file_contexts device.te file exec.te domains.te file service.te file_contexts.bin service_contexts property.te property_contexts"
         os.system(cmd)
         os.system('cls' if os.name == 'nt' else 'clear')
 
 while value != 0:
     print (' ----------------------------')
-    value = int(input(" 1) English \n 2) Русский \n 3) Українська \n---------------------------- \n "))
+    value = int(input(" 1) English \n 2) Русский \n 3) Українська \n ---------------------------- \n "))
     if (value != 1 and value != 2 and value != 3 ):
         print ("\n Program has been terminated. \n" )
     if (value == 1):
         while value != 0:
             print (' ----------------------------')
-            value = int(input(" Choose category: \n \n 0) Exit \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n 5) Generating domains only \n 6) Parsing stock file_contexts binary (taken from boot.img) for getting stock policies \n 7) Parsing stock sepolicy binary (taken from boot.img) for getting stock rules \n 8) Cleanup \n---------------------------- \n "))
+            value = int(input(" Choose category: \n \n 0) Exit \n 00) Cleanup \n 1) Parsing property_contexts \n 2) Parsing service_contexts \n 3) Parsing file_contexts \n 4) Parsing file_contexts with creating domains \n 5) Generating domains only \n 6) Parsing stock file_contexts binary (taken from boot.img) for getting stock policies \n 7) Parsing stock sepolicy binary (taken from boot.img) for getting stock rules \n 8) Parsing local log.txt for getting SEPolicy rules \n 9) Parsing log.txt for getting SEPolicy rules via Internet (log.txt will be given from your entered URL) \n 10) Cleanup \n  ---------------------------- \n "))
             
             if (value == 0):
                 print('-' * 28 + '\n Thanks!\n' + '-' * 28)
@@ -238,12 +259,18 @@ while value != 0:
                 stock_sepo()
 
             elif (value == 8):
+                sepologparser_local()
+
+            elif (value == 9):
+                sepologparser_inet()
+
+            elif (value == 00):
                 cleanup()
 
     if (value == 2):
         while value != 0:
             print (' ----------------------------')
-            value = int(input(" Выберите категорию: \n \n 0) Выход \n 1) Анализ property_contexts \n 2) Анализ service_contexts \n 3) Анализ file_contexts \n 4) Анализ file_contexts из созданием типов \n 5) Создание ТОЛЬКО типов \n 6) Анализ стокового бинарника file_contexts (взятого из boot.img) для получения стоковых политик \n 7) Анализ стокового бинарника sepolicy (взятого из boot.img) для получения стоковых политик \n 8) Очистка \n---------------------------- \n "))
+            value = int(input(" Выберите категорию: \n \n 0) Выход \n 00) Очистка \n 1) Анализ property_contexts \n 2) Анализ service_contexts \n 3) Анализ file_contexts \n 4) Анализ file_contexts из созданием типов \n 5) Создание ТОЛЬКО типов \n 6) Анализ стокового бинарника file_contexts (взятого из boot.img) для получения стоковых политик \n 7) Анализ стокового бинарника sepolicy (взятого из boot.img) для получения стоковых политик \n 8) Анализ локального log.txt для получения правил SEPolicy \n 9) Анализ log.txt для получения правил SEPolicy через Internet (log.txt будет скачан по ссылке, которую Вы введёте. URL) \n   ---------------------------- \n "))
             
             if (value == 0):
                 print('-' * 28 + '\n Спасибо!\n' + '-' * 28)
@@ -274,12 +301,18 @@ while value != 0:
                 stock_sepo()
 
             elif (value == 8):
+                sepologparser_local()
+
+            elif (value == 9):
+                sepologparser_inet()
+
+            elif (value == 00):
                 cleanup()
 
     if (value == 3):
         while value != 0:
             print (' ----------------------------')
-            value = int(input(" Оберіть категорію: \n \n 0) Вихід \n 1) Аналіз property_contexts \n 2) Аналіз service_contexts \n 3) Аналіз file_contexts \n 4) Аналіз file_contexts зі створенням політик  \n 5) Створення ТІЛЬКИ політик \n 6) Аналіз стокового бінарника file_contexts (взятий з boot.img) для отримання стокових політик \n 7) Аналіз стокового бінарника sepolicy (взятий з boot.img) для отримання стокових політик \n 8) Очистка \n---------------------------- \n "))
+            value = int(input(" Оберіть категорію: \n \n 0) Вихід \n 00) Очистка \n 1) Аналіз property_contexts \n 2) Аналіз service_contexts \n 3) Аналіз file_contexts \n 4) Аналіз file_contexts зі створенням політик  \n 5) Створення ТІЛЬКИ політик \n 6) Аналіз стокового бінарника file_contexts (взятий з boot.img) для отримання стокових політик \n 7) Аналіз стокового бінарника sepolicy (взятий з boot.img) для отримання стокових політик \n 8) Аналіз локального log.txt для отримання правил SEPolicy \n 9) Аналіз log.txt для отримання правил SEPolicy через Internet (log.txt буде завантажений з URL, яку Ви введете) \n  ---------------------------- \n "))
             
             if (value == 0):
                 print('-' * 28 + '\n Дякую!\n' + '-' * 28)
@@ -310,4 +343,10 @@ while value != 0:
                 stock_sepo()
 
             elif (value == 8):
+                sepologparser_local()
+
+            elif (value == 9):
+                sepologparser_inet()
+
+            elif (value == 00):
                 cleanup()
