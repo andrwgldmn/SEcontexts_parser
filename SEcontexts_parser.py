@@ -22,6 +22,8 @@ def sepologparser_inet():
             pat = r"""avc:\s*denied\s*({\s*[^}]*\s*})\s+.*?scontext=u:r:([^:]*):s\d+.*?tcontext=.*?:(\w{2,}):s0.*?\s+tclass=([^\s:]*)\s+"""
             for what, scnt, tcnt, tc in re.findall(pat, data):
                 output_file.write("allow {} {}:{} {} %\n".format(scnt, tcnt, tc, what) %";")
+        os.system('sort allows.te | uniq -u > secontexts.te')
+        os.system('rm allows.te')
         os.system('cls' if os.name == 'nt' else 'clear') 
 
 def sepologparser_local():
@@ -30,6 +32,8 @@ def sepologparser_local():
             pat = r"""avc:\s*denied\s*({\s*[^}]*\s*})\s+.*?scontext=u:r:([^:]*):s\d+.*?tcontext=.*?:(\w{2,}):s0.*?\s+tclass=([^\s:]*)\s+"""
             for what, scnt, tcnt, tc in re.findall(pat, text):
                 output_file.write("allow {} {}:{} {} %\n".format(scnt, tcnt, tc, what) %";")
+        os.system('sort allows.te | uniq -u > secontexts.te')
+        os.system('rm allows.te')
         os.system('cls' if os.name == 'nt' else 'clear')  
 
 def parse_fcf():
