@@ -42,5 +42,13 @@ sudo apt-get install python-dev python3-dev python-requests
 python SEcontexts_parser.py
 ```
 
+### Using on Windows
+
+1. Download Python 3 from official site
+
+2. Run script SEcontexts_parser-win.py
+
+Logcat parsing via Internet is not working on Windows because requests library is not included in Windows default installation
+
 Thanks to https://ru.stackoverflow.com/users/213678/andrey and https://ru.stackoverflow.com/users/201445/gil9red and https://github.com/TheDeadOne and https://ru.stackoverflow.com/users/211923/maxu
 
